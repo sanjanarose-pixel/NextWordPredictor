@@ -8,27 +8,29 @@ weight = 1
 bias = 0
 
 # Learning rate
-learning_rate = 0.5
+learning_rate = 0.1
 
-# Make a prediction
-prediction = weight * x + bias
+# Train for 10 steps
+for step in range(10):
 
-# Calculate error
-error = prediction - target
+    # Make prediction
+    prediction = weight * x + bias
 
-print("Prediction:", prediction)
-print("Target:", target)
-print("Error:", error)
+    # Calculate error
+    error = prediction - target
 
-# Update weight
-weight = weight - learning_rate * error * x
+    # Update weight and bias
+    weight = weight - learning_rate * error * x
+    bias = bias - learning_rate * error
 
-# Update bias
-bias = bias - learning_rate * error
+    # Display progress
+    print("Step:", step + 1)
+    print("Prediction:", round(prediction, 2))
+    print("Error:", round(error, 2))
+    print()
 
-# Make another prediction
-new_prediction = weight * x + bias
+# Final prediction
+final_prediction = weight * x + bias
 
-print("Updated weight:", weight)
-print("Updated bias:", bias)
-print("New prediction:", new_prediction)
+print("Final prediction:", round(final_prediction, 2))
+print("Actual target:", target)
