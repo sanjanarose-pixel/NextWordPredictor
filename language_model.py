@@ -1,35 +1,34 @@
 
-dataset = [
-    "The robot moved across the room",
-    "The robot moved across the floor",
-    "The robot walked into the room"
-]
+# Input and expected output
+x = 2
+target = 10
 
-input_text = input("Enter two words: ").lower()
-context = input_text.split()
+# Initial weight and bias
+weight = 1
+bias = 0
 
-next_words = []
+# Learning rate
+learning_rate = 0.5
 
-for sentence in dataset:
-    words = sentence.lower().split()
+# Make a prediction
+prediction = weight * x + bias
 
-    for i in range(len(words) - len(context)):
-        if words[i:i + len(context)] == context:
-            next_words.append(words[i + len(context)])
+# Calculate error
+error = prediction - target
 
-word_counts = {}
+print("Prediction:", prediction)
+print("Target:", target)
+print("Error:", error)
 
-for word in next_words:
-    if word in word_counts:
-        word_counts[word] += 1
-    else:
-        word_counts[word] = 1
+# Update weight
+weight = weight - learning_rate * error * x
 
-total = len(next_words)
+# Update bias
+bias = bias - learning_rate * error
 
-if total > 0:
-    for word in word_counts:
-        probability = word_counts[word] / total
-        print(word, ":", round(probability * 100, 2), "%")
-else:
-    print("No matching context found.")
+# Make another prediction
+new_prediction = weight * x + bias
+
+print("Updated weight:", weight)
+print("Updated bias:", bias)
+print("New prediction:", new_prediction)
