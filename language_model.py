@@ -1,47 +1,35 @@
 
 dataset = [
     "The robot moved across the room",
-    "The robot walked into the room",
-    "The machine moved across the floor"
+    "The robot moved across the floor",
+    "The robot walked into the room"
 ]
 
-vocabulary = []
+input_text = input("Enter two words: ").lower()
+context = input_text.split()
+
+next_words = []
 
 for sentence in dataset:
     words = sentence.lower().split()
 
-    for word in words:
-        if word not in vocabulary:
-            vocabulary.append(word)
+    for i in range(len(words) - len(context)):
+        if words[i:i + len(context)] == context:
+            next_words.append(words[i + len(context)])
 
-word_to_id = {}
+word_counts = {}
 
-for index, word in enumerate(vocabulary):
-    word_to_id[word] = index
+for word in next_words:
+    if word in word_counts:
+        word_counts[word] += 1
+    else:
+        word_counts[word] = 1
 
-print(word_to_id)
+total = len(next_words)
 
-print("Robot ID:", word_to_id["robot"])
-
-input_sequences = []
-target_words = []
-
-for sentence in dataset:
-    words = sentence.lower().split()
-
-    for i in range(1, len(words)):
-        context = words[:i]
-        target = words[i]
-
-        input_ids = []
-
-        for word in context:
-            input_ids.append(word_to_id[word])
-
-        target_id = word_to_id[target]
-
-        input_sequences.append(input_ids)
-        target_words.append(target_id)
-
-print("Input sequences:", input_sequences)
-print("Target words:", target_words)
+if total > 0:
+    for word in word_counts:
+        probability = word_counts[word] / total
+        print(word, ":", round(probability * 100, 2), "%")
+else:
+    print("No matching context found.")
