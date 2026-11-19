@@ -1,36 +1,40 @@
 
-# Input and expected output
+# Input and target
 x = 2
 target = 10
 
-# Initial weight and bias
+# Initial parameters
 weight = 1
 bias = 0
 
 # Learning rate
 learning_rate = 0.1
 
-# Train for 10 steps
-for step in range(10):
+# FORWARD PROPAGATION
+prediction = weight * x + bias
 
-    # Make prediction
-    prediction = weight * x + bias
+# Calculate loss
+loss = (prediction - target) ** 2
 
-    # Calculate error
-    error = prediction - target
+print("Prediction:", prediction)
+print("Loss:", loss)
 
-    # Update weight and bias
-    weight = weight - learning_rate * error * x
-    bias = bias - learning_rate * error
+# BACKPROPAGATION
+weight_gradient = 2 * (prediction - target) * x
+bias_gradient = 2 * (prediction - target)
 
-    # Display progress
-    print("Step:", step + 1)
-    print("Prediction:", round(prediction, 2))
-    print("Error:", round(error, 2))
-    print()
+print("Weight gradient:", weight_gradient)
+print("Bias gradient:", bias_gradient)
 
-# Final prediction
-final_prediction = weight * x + bias
+# GRADIENT DESCENT
+weight = weight - learning_rate * weight_gradient
+bias = bias - learning_rate * bias_gradient
 
-print("Final prediction:", round(final_prediction, 2))
-print("Actual target:", target)
+# New prediction
+new_prediction = weight * x + bias
+new_loss = (new_prediction - target) ** 2
+
+print("Updated weight:", weight)
+print("Updated bias:", bias)
+print("New prediction:", new_prediction)
+print("New loss:", new_loss)
