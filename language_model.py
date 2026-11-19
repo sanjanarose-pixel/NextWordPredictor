@@ -294,3 +294,204 @@ def generate_text(starting_text, number_of_words):
 
 print("\nGenerated text:")
 print(generate_text("the robot", 4))
+
+import re
+from collections import Counter
+
+
+# STEP 1: Read the dataset
+
+with open("dataset.txt", "r", encoding="utf-8") as file:
+    dataset_text = file.read()
+
+
+# STEP 2: Convert text into tokens
+
+def tokenize(text):
+
+    text = text.lower()
+
+    # Clean special WikiText formatting
+    text = text.replace("@-@", "-")
+    text = text.replace("@,@", ",")
+    text = text.replace("@.@", ".")
+
+    # Separate words and punctuation
+    tokens = re.findall(
+        r"\w+(?:['’]\w+)*|[^\w\s]",
+        text,
+        flags=re.UNICODE
+    )
+
+    return tokens
+
+
+tokens = tokenize(dataset_text)
+
+
+# STEP 3: Count word frequencies
+
+word_counts = Counter(tokens)
+
+
+# STEP 4: Build vocabulary
+
+
+min_frequency = 2
+max_vocab_size = 20000
+
+vocabulary = ["<unk>"]
+
+for word, count in word_counts.most_common():
+
+    if count < min_frequency:
+        break
+
+    if len(vocabulary) >= max_vocab_size:
+        break
+
+    vocabulary.append(word)
+
+
+
+# STEP 5: Assign numerical IDs
+
+word_to_id = {
+    word: index
+    for index, word in enumerate(vocabulary)
+}
+
+id_to_word = {
+    index: word
+    for word, index in word_to_id.items()
+}
+
+
+# STEP 6: Convert tokens into numerical IDs
+
+def encode(words):
+
+    return [
+        word_to_id.get(word, word_to_id["<unk>"])
+        for word in words
+    ]
+
+
+# STEP 7: Convert numerical IDs back into words
+
+def decode(token_ids):
+
+    return [
+        id_to_word.get(token_id, "<unk>")
+        for token_id in token_ids
+    ]
+
+
+# STEP 8: Display results
+
+encoded_sample = encode(tokens[:20])
+
+print("\nTOKENIZER RESULTS")
+print("------------------------")
+
+print("Total characters:", len(dataset_text))
+print("Total tokens:", len(tokens))
+print("Unique words:", len(word_counts))
+print("Vocabulary size:", len(vocabulary))
+
+print("\nOriginal tokens:")
+print(tokens[:20])
+
+print("\nNumerical representation:")
+print(encoded_sample)
+
+print("\nDecoded representation:")
+print(decode(encoded_sample))
+
+import torch
+from torch.utils.data import Dataset
+
+
+# STEP 9: Load all three datasets
+
+with open("validation.txt", "r", encoding="utf-8") as file:
+    validation_text = file.read()
+
+with open("test.txt", "r", encoding="utf-8") as file:
+    test_text = file.read()
+
+
+# STEP 10: Tokenize and encode each dataset
+
+training_ids = encode(tokenize(dataset_text))
+validation_ids = encode(tokenize(validation_text))
+test_ids = encode(tokenize(test_text))
+
+
+# STEP 11: Define the context window
+
+context_length = 128
+
+
+# STEP 12: Create a dataset of input-target pairs
+
+class NextTokenDataset(Dataset):
+
+    def __init__(self, token_ids, context_length):
+        self.token_ids = token_ids
+        self.context_length = context_length
+
+    def __len__(self):
+        return len(self.token_ids) - self.context_length
+
+    def __getitem__(self, index):
+
+        input_sequence = self.token_ids[
+            index:index + self.context_length
+        ]
+
+        target_sequence = self.token_ids[
+            index + 1:index + self.context_length + 1
+        ]
+
+        return (
+            torch.tensor(input_sequence, dtype=torch.long),
+            torch.tensor(target_sequence, dtype=torch.long)
+        )
+
+
+# STEP 13: Create training, validation and test datasets
+
+train_dataset = NextTokenDataset(
+    training_ids, context_length
+)
+
+validation_dataset = NextTokenDataset(
+    validation_ids, context_length
+)
+
+test_dataset = NextTokenDataset(
+    test_ids, context_length
+)
+
+
+# STEP 14: Display results
+
+print("\nSEQUENCE PREPARATION RESULTS")
+print("-----------------------------")
+
+print("Training tokens:", len(training_ids))
+print("Validation tokens:", len(validation_ids))
+print("Test tokens:", len(test_ids))
+
+print("Training examples:", len(train_dataset))
+print("Validation examples:", len(validation_dataset))
+print("Test examples:", len(test_dataset))
+
+sample_input, sample_target = train_dataset[0]
+
+print("\nFirst input sequence:")
+print(decode(sample_input.tolist()))
+
+print("\nFirst target sequence:")
+print(decode(sample_target.tolist()))
