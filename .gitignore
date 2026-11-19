@@ -4,3 +4,5 @@ dataset.txt
 validation.txt
 test.txt
 *.pyc
+*.pth
+*.pth
