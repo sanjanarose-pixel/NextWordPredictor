@@ -246,3 +246,51 @@ for epoch in range(epochs):
 
     if (epoch + 1) % 50 == 0:
         print(f"Epoch {epoch + 1}, Loss: {loss.item():.4f}")
+# Test prediction
+
+test_input = torch.tensor([0, 1])
+
+with torch.no_grad():
+    scores = model(test_input)
+    probabilities = torch.softmax(scores, dim=0)
+
+    predicted_id = torch.argmax(probabilities).item()
+
+print("\nInput: the robot")
+print("Predicted next word:", id_to_word[predicted_id])
+print("Probabilities:", probabilities)
+# Generate multiple words
+
+def generate_text(starting_text, number_of_words):
+
+    words = starting_text.lower().split()
+
+    # Keep the last two words as context
+    for _ in range(number_of_words):
+
+        # Convert the last two words into IDs
+        input_ids = [
+            word_to_id[words[-2]],
+            word_to_id[words[-1]]
+        ]
+
+        input_tensor = torch.tensor(input_ids)
+
+        # Predict the next word
+        with torch.no_grad():
+            scores = model(input_tensor)
+            predicted_id = torch.argmax(scores).item()
+
+        # Convert ID back into a word
+        predicted_word = id_to_word[predicted_id]
+
+        # Add the predicted word
+        words.append(predicted_word)
+
+    return " ".join(words)
+
+
+# Test text generation
+
+print("\nGenerated text:")
+print(generate_text("the robot", 4))
