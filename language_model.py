@@ -1,74 +1,119 @@
 
+# ==========================================
+# NEXT WORD PREDICTOR
+# Step 1: Dataset and vocabulary preparation
+# ==========================================
+
 # Training dataset
-training_inputs = [
-    [2, 3],
-    [4, 3],
-    [5, 2],
-    [1, 4]
+dataset = [
+    "The robot moved across the room",
+    "The robot walked into the room",
+    "The machine moved across the floor"
 ]
 
-training_targets = [10, 14, 12, 9]
 
-# Initial parameters
-weight1 = 1.0
-weight2 = 1.0
-bias = 0.0
+# STEP 1: Tokenization
 
-learning_rate = 0.01
+tokenized_sentences = []
 
-# Train for 100 epochs
-for epoch in range(100):
+for sentence in dataset:
+    words = sentence.lower().split()
+    tokenized_sentences.append(words)
 
-    total_gradient_w1 = 0
-    total_gradient_w2 = 0
-    total_gradient_b = 0
 
-    total_loss = 0
+# STEP 2: Create vocabulary
 
-    # Go through all training examples
-    for i in range(4):
+vocabulary = []
 
-        x1 = training_inputs[i][0]
-        x2 = training_inputs[i][1]
+for sentence in tokenized_sentences:
+    for word in sentence:
 
-        target = training_targets[i]
+        if word not in vocabulary:
+            vocabulary.append(word)
 
-        # Forward propagation
-        prediction = weight1 * x1 + weight2 * x2 + bias
 
-        # Calculate loss
-        error = prediction - target
-        loss = error ** 2
+# STEP 3: Assign IDs to words
 
-        total_loss += loss
+word_to_id = {}
 
-        # Backpropagation
-        gradient_w1 = 2 * error * x1
-        gradient_w2 = 2 * error * x2
-        gradient_b = 2 * error
+for i in range(len(vocabulary)):
+    word_to_id[vocabulary[i]] = i
 
-        # Accumulate gradients
-        total_gradient_w1 += gradient_w1
-        total_gradient_w2 += gradient_w2
-        total_gradient_b += gradient_b
 
-    # Calculate average gradients
-    average_gradient_w1 = total_gradient_w1 / 4
-    average_gradient_w2 = total_gradient_w2 / 4
-    average_gradient_b = total_gradient_b / 4
+id_to_word = {}
 
-    # Update parameters
-    weight1 -= learning_rate * average_gradient_w1
-    weight2 -= learning_rate * average_gradient_w2
-    bias -= learning_rate * average_gradient_b
+for word in word_to_id:
+    word_id = word_to_id[word]
+    id_to_word[word_id] = word
 
-    # Calculate average loss
-    average_loss = total_loss / 4
 
-    if epoch % 10 == 0:
-        print("Epoch:", epoch + 1)
-        print("Average loss:", average_loss)
-        print()
+# STEP 4: Generate training examples
+# Use two words to predict the next word
 
-print("Final weights:", weight1, weight2)
-print("Final bias:", bias)
+training_inputs = []
+training_targets = []
+
+for sentence in tokenized_sentences:
+
+    for i in range(len(sentence) - 2):
+
+        first_word = sentence[i]
+        second_word = sentence[i + 1]
+        next_word = sentence[i + 2]
+
+        first_id = word_to_id[first_word]
+        second_id = word_to_id[second_word]
+        target_id = word_to_id[next_word]
+
+        training_inputs.append([first_id, second_id])
+        training_targets.append(target_id)
+
+
+# STEP 5: Display results
+
+print("Vocabulary:", vocabulary)
+print("Word to ID:", word_to_id)
+print("ID to Word:", id_to_word)
+
+print("\nTraining inputs:", training_inputs)
+print("Training targets:", training_targets)
+
+print("\nTotal vocabulary size:", len(vocabulary))
+print("Total training examples:", len(training_inputs))
+
+
+# ==========================================
+# STEP 2: EMBEDDING LAYER
+# ==========================================
+
+import torch
+
+# Number of unique words
+vocabulary_size = len(vocabulary)
+
+# Number of values representing each word
+embedding_dimension = 4
+
+# Create embedding layer
+embedding_layer = torch.nn.Embedding(
+    vocabulary_size,
+    embedding_dimension
+)
+
+# Display embedding matrix
+print("\nEmbedding matrix:")
+print(embedding_layer.weight)
+
+# Display matrix shape
+print("\nMatrix shape:")
+print(embedding_layer.weight.shape)
+
+# Get embedding of "robot"
+robot_id = word_to_id["robot"]
+
+robot_embedding = embedding_layer(
+    torch.tensor(robot_id)
+)
+
+print("\nRobot ID:", robot_id)
+print("Robot embedding:", robot_embedding)
