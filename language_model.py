@@ -145,3 +145,104 @@ print(combined_embedding)
 
 print("\nCombined embedding shape:")
 print(combined_embedding.shape)
+
+# Neural network model
+
+class NextWordModel(torch.nn.Module):
+
+    def __init__(self, vocabulary_size, embedding_dimension):
+        super().__init__()
+
+        # Convert word IDs into vectors
+        self.embedding = torch.nn.Embedding(
+            vocabulary_size,
+            embedding_dimension
+        )
+
+        # Hidden layer: 8 inputs -> 16 neurons
+        self.hidden = torch.nn.Linear(
+            embedding_dimension * 2,
+            16
+        )
+
+        # Output layer: 16 neurons -> 9 scores
+        self.output = torch.nn.Linear(
+            16,
+            vocabulary_size
+        )
+
+    def forward(self, input_words):
+
+        # Get embeddings for both words
+        embeddings = self.embedding(input_words)
+
+        # Join the two embeddings
+        combined = embeddings.reshape(-1)
+
+        # Hidden layer
+        hidden_output = self.hidden(combined)
+
+        # ReLU activation
+        hidden_output = torch.relu(hidden_output)
+
+        # Output scores
+        scores = self.output(hidden_output)
+
+        return scores
+
+
+# Create the model
+model = NextWordModel(
+    vocabulary_size,
+    embedding_dimension
+)
+
+# Test the model
+test_input = torch.tensor([0, 1])
+
+scores = model(test_input)
+
+print("\nModel output scores:")
+print(scores)
+
+print("\nOutput shape:")
+print(scores.shape)
+# Convert training data into PyTorch tensors
+
+inputs = torch.tensor(training_inputs, dtype=torch.long)
+targets = torch.tensor(training_targets, dtype=torch.long)
+
+# Loss function
+loss_function = torch.nn.CrossEntropyLoss()
+
+# Optimizer
+optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+
+# Training loop
+epochs = 500
+
+for epoch in range(epochs):
+
+    # Get predictions for all training examples
+    predictions = []
+
+    for input_words in inputs:
+        scores = model(input_words)
+        predictions.append(scores)
+
+    predictions = torch.stack(predictions)
+
+    # Calculate loss
+    loss = loss_function(predictions, targets)
+
+    # Clear old gradients
+    optimizer.zero_grad()
+
+    # Backpropagation
+    loss.backward()
+
+    # Update model weights
+    optimizer.step()
+
+    if (epoch + 1) % 50 == 0:
+        print(f"Epoch {epoch + 1}, Loss: {loss.item():.4f}")
