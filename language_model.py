@@ -117,3 +117,31 @@ robot_embedding = embedding_layer(
 
 print("\nRobot ID:", robot_id)
 print("Robot embedding:", robot_embedding)
+# Get the IDs of the two input words
+first_word_id = word_to_id["the"]
+second_word_id = word_to_id["robot"]
+
+# Convert both IDs into tensors
+first_word_tensor = torch.tensor(first_word_id)
+second_word_tensor = torch.tensor(second_word_id)
+
+# Get their embeddings
+first_embedding = embedding_layer(first_word_tensor)
+second_embedding = embedding_layer(second_word_tensor)
+
+# Join both embeddings
+combined_embedding = torch.cat(
+    (first_embedding, second_embedding)
+)
+
+print("\nFirst word embedding:")
+print(first_embedding)
+
+print("\nSecond word embedding:")
+print(second_embedding)
+
+print("\nCombined embedding:")
+print(combined_embedding)
+
+print("\nCombined embedding shape:")
+print(combined_embedding.shape)
