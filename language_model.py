@@ -1,57 +1,74 @@
 
-# Two input values
-inputs = [2, 3]
-
-# Three neurons in the hidden layer
-weights = [
-    [1.0, 0.2],
-    [0.3, 0.8],
-    [0.6, 0.4]
+# Training dataset
+training_inputs = [
+    [2, 3],
+    [4, 3],
+    [5, 2],
+    [1, 4]
 ]
 
-biases = [1, -1, 0.5]
+training_targets = [10, 14, 12, 9]
 
+# Initial parameters
+weight1 = 1.0
+weight2 = 1.0
+bias = 0.0
 
-# ReLU activation function
-def relu(value):
-    if value > 0:
-        return value
-    else:
-        return 0
+learning_rate = 0.01
 
+# Train for 100 epochs
+for epoch in range(100):
 
-# Calculate outputs of hidden neurons
-hidden_outputs = []
+    total_gradient_w1 = 0
+    total_gradient_w2 = 0
+    total_gradient_b = 0
 
-for i in range(3):
+    total_loss = 0
 
-    # Weighted calculation
-    total = 0
+    # Go through all training examples
+    for i in range(4):
 
-    for j in range(2):
-        total = total + inputs[j] * weights[i][j]
+        x1 = training_inputs[i][0]
+        x2 = training_inputs[i][1]
 
-    total = total + biases[i]
+        target = training_targets[i]
 
-    # Apply activation
-    output = relu(total)
+        # Forward propagation
+        prediction = weight1 * x1 + weight2 * x2 + bias
 
-    hidden_outputs.append(output)
+        # Calculate loss
+        error = prediction - target
+        loss = error ** 2
 
+        total_loss += loss
 
-print("Hidden layer outputs:", hidden_outputs)
-# Output neuron weights
-output_weights = [0.4, 0.7, 0.2]
+        # Backpropagation
+        gradient_w1 = 2 * error * x1
+        gradient_w2 = 2 * error * x2
+        gradient_b = 2 * error
 
-# Output neuron bias
-output_bias = 0.5
+        # Accumulate gradients
+        total_gradient_w1 += gradient_w1
+        total_gradient_w2 += gradient_w2
+        total_gradient_b += gradient_b
 
-# Calculate final output
-final_output = 0
+    # Calculate average gradients
+    average_gradient_w1 = total_gradient_w1 / 4
+    average_gradient_w2 = total_gradient_w2 / 4
+    average_gradient_b = total_gradient_b / 4
 
-for i in range(3):
-    final_output += hidden_outputs[i] * output_weights[i]
+    # Update parameters
+    weight1 -= learning_rate * average_gradient_w1
+    weight2 -= learning_rate * average_gradient_w2
+    bias -= learning_rate * average_gradient_b
 
-final_output += output_bias
+    # Calculate average loss
+    average_loss = total_loss / 4
 
-print("Final network output:", final_output)
+    if epoch % 10 == 0:
+        print("Epoch:", epoch + 1)
+        print("Average loss:", average_loss)
+        print()
+
+print("Final weights:", weight1, weight2)
+print("Final bias:", bias)
