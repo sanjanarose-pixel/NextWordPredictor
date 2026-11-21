@@ -1,0 +1,60 @@
+{
+  "dataset_documents": {
+    "train": 25000,
+    "validation": 2500,
+    "test": 2500
+  },
+  "actual_bpe_tokens_including_eos": {
+    "train": 9051969,
+    "validation": 915071,
+    "test": 907851
+  },
+  "windows_per_split": {
+    "train": 155611,
+    "validation": 15739,
+    "test": 15604
+  },
+  "steps_per_epoch": 4863,
+  "completed_steps": 19452,
+  "best_epoch": 4,
+  "training_history": [
+    {
+      "epoch": 1,
+      "steps": 4863,
+      "train_loss": 2.690534007217208,
+      "validation_loss": 2.1180583849691414
+    },
+    {
+      "epoch": 2,
+      "steps": 9726,
+      "train_loss": 2.139544270286376,
+      "validation_loss": 1.9427902311710186
+    },
+    {
+      "epoch": 3,
+      "steps": 14589,
+      "train_loss": 2.037036901462663,
+      "validation_loss": 1.8713573955962668
+    },
+    {
+      "epoch": 4,
+      "steps": 19452,
+      "train_loss": 1.9901173956125842,
+      "validation_loss": 1.8338410866058243
+    }
+  ],
+  "best_validation_loss": 1.8338410866058243,
+  "test_loss": 1.8420098821957893,
+  "model_parameters": 237312,
+  "model_config": {
+    "vocab_size": 2048,
+    "dimension": 64,
+    "context_length": 64,
+    "number_of_heads": 4,
+    "number_of_blocks": 2,
+    "dropout": 0.1,
+    "pad_id": 0
+  },
+  "checkpoint": "artifacts/v4/v4_best_20261121_170608_22072_1b90f1c4.pth",
+  "tokenizer": "artifacts/v4/tokenizer_v4_20261121_170608_22072_1b90f1c4.json"
+}

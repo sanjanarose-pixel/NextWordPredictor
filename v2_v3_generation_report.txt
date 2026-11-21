@@ -1,0 +1,135 @@
+NextWordPredictor: Version 2 vs Version 3 generation review
+====================================================================
+
+Model naming: Version 2 is the sentence-level high-quality model, matching compare_v2_v3.py.
+The original word-level Stage 2 checkpoints are a separate model track.
+Both models were loaded through their project inference loaders.
+The shared evaluator decoder is used because the public inference functions count words,
+while this comparison requires exactly 30 generated model tokens.
+
+Shared decoding settings:
+  exactly 30 new tokens; context=64; temperature=0.7; top-k=24
+  seed per prompt=base 321 + prompt index; EOS is suppressed to keep fixed-length outputs.
+  sampling is performed on CPU; every continuation is intentionally cut off at token 30.
+  Repetition avoidance and repeated-word penalty follow the existing inference implementations.
+  Python=3.15.1; PyTorch=2.15.0+cpu
+
+Checkpoint metadata:
+Version 2 (sentence-level)
+  checkpoint: high_quality_model.pth
+  checkpoint SHA-256: d8cd77ecc0c905d6598a3d60fefd8adc73b4efc5610778f3f7c4ac23f4ad7357
+  tokenizer: high_quality_tokenizer.json
+  tokenizer SHA-256: 7b264023d316d73c9a6b05006432dc79cbbbba78e07a25f8ac1e8adaae5c58da
+  config: {'vocabulary_size': 8000, 'dimension': 128, 'context_length': 96, 'number_of_heads': 4, 'number_of_blocks': 3, 'dropout': 0.1}
+  tokenizer symbols: 8000
+  checkpoint epoch: 8
+  validation loss: 4.789111387729645
+  model context length: 96
+
+Version 3 (paragraph-level)
+  checkpoint: v3_model.pth
+  checkpoint SHA-256: cc5df84735552d2ff5d3a2c28b860e8cde268e0f8207b0099e35701755d85013
+  tokenizer: v3_tokenizer.json
+  tokenizer SHA-256: 5e478160914792492c36deacb02ae527c5df393fee8db815af6cfa1bec681f0c
+  config: {'vocabulary_size': 8000, 'dimension': 128, 'context_length': 96, 'number_of_heads': 4, 'number_of_blocks': 3, 'dropout': 0.1}
+  tokenizer symbols: 8000
+  checkpoint epoch: 6
+  validation loss: 4.832969450950623
+  model context length: 96
+
+Validation-loss caution: each loss comes from a different training corpus/tokenizer setup;
+these values are context only and do not by themselves establish generation quality.
+Automatic flags are heuristics to guide inspection, not quality scores.
+
+Generated outputs
+--------------------------------------------------------------------
+
+01. [Robotics] A warehouse robot noticed that one package had fallen beside the conveyor, so
+   seed: 322
+   Version 2 (sentence-level): they may not be used..., if we can think about the time to go up to a time after a year - old program..
+      output length: 30 generated token(s)
+      review flags: fixed 30-token cutoff; may end mid-sentence; formatting: repeated punctuation
+   Version 3 (paragraph-level): the more difficult to do this, for example, is an additional way to use in a few days. It is one of all the most important part
+      output length: 30 generated token(s)
+      review flags: fixed 30-token cutoff; may end mid-sentence
+
+02. [Robotics] The robotic arm paused above the delicate glass sample when
+   seed: 323
+   Version 2 (sentence-level): the engine is used to remove the water..., it will be to keep the first step in your home.. g., with a
+      output length: 30 generated token(s)
+      review flags: fixed 30-token cutoff; may end mid-sentence; formatting: repeated punctuation
+   Version 3 (paragraph-level): they have a pack. We could be able to reign in the image that is used. That ’ s why it is that there are some
+      output length: 30 generated token(s)
+      review flags: fixed 30-token cutoff; may end mid-sentence; formatting: split apostrophe/contraction spacing
+
+03. [Science] The scientist repeated the experiment and discovered that the tiny change in temperature
+   seed: 324
+   Version 2 (sentence-level): of the surface. ' '. ' The Landani - Zaesel Had Right (1704) in which was
+      output length: 30 generated token(s)
+      review flags: fixed 30-token cutoff; may end mid-sentence
+   Version 3 (paragraph-level): is a very hot - time, which we could not be unlikely to have some of the exact size. The term “ Lyme ” is an
+      output length: 30 generated token(s)
+      review flags: fixed 30-token cutoff; may end mid-sentence
+
+04. [Science] As the telescope turned toward the distant planet, the research team
+   seed: 325
+   Version 2 (sentence-level): will have a strong and more information about the best way..., however, if they are able to use the gestrogen in the same
+      output length: 30 generated token(s)
+      review flags: fixed 30-token cutoff; may end mid-sentence; formatting: repeated punctuation
+   Version 3 (paragraph-level): will be a new study. In the late 1980s, it was able to produce more than the same, if the results are found in the atmosphere
+      output length: 30 generated token(s)
+      review flags: word repeated 4+ times: the; fixed 30-token cutoff; may end mid-sentence
+
+05. [Everyday life] On a rainy Tuesday morning, Maya missed her bus and decided to
+   seed: 326
+   Version 2 (sentence-level): be a good part of the Saissan, and the American Free. 8. 6 million people living in the summer. 0 - 2
+      output length: 30 generated token(s)
+      review flags: fixed 30-token cutoff; may end mid-sentence
+   Version 3 (paragraph-level): create his death. He was to write his work as " and she was a great choice of the book. This is the first, but he wrote
+      output length: 30 generated token(s)
+      review flags: fixed 30-token cutoff; may end mid-sentence; formatting: unmatched double quote
+
+06. [Everyday life] After dinner, the neighbors gathered in the garden to talk about
+   seed: 327
+   Version 2 (sentence-level): a sale. ' to a few days, and then in the way we can start of them.!... The most common causes of
+      output length: 30 generated token(s)
+      review flags: fixed 30-token cutoff; may end mid-sentence; formatting: repeated punctuation
+   Version 3 (paragraph-level): the children. The most common forms of a person, which is not a way to play an opportunity to make up the same and the work, as
+      output length: 30 generated token(s)
+      review flags: fixed 30-token cutoff; may end mid-sentence
+
+07. [Technology] The new phone updated overnight, and by morning its owner noticed
+   seed: 328
+   Version 2 (sentence-level): to the new state and then it, for a new network of the company.. NEA - CIGF provides the energy to supply water
+      output length: 30 generated token(s)
+      review flags: fixed 30-token cutoff; may end mid-sentence; formatting: repeated punctuation
+   Version 3 (paragraph-level): to the entire house. These worksheets are also used to make their own and use of the child ’ s book. Students are read in the page,
+      output length: 30 generated token(s)
+      review flags: fixed 30-token cutoff; may end mid-sentence; formatting: split apostrophe/contraction spacing
+
+08. [Technology] When the office network went silent, the technician checked the server room and
+   seed: 329
+   Version 2 (sentence-level): to see that the Internet. D. S. and the first step is to make sure it is not just a new machine.!! The B
+      output length: 30 generated token(s)
+      review flags: fixed 30-token cutoff; may end mid-sentence; incomplete final word; formatting: repeated punctuation
+   Version 3 (paragraph-level): then incorporate a server. The user to work on the computer and is designed to create a text. It is not only possible to be used with
+      output length: 30 generated token(s)
+      review flags: fixed 30-token cutoff; may end mid-sentence
+
+09. [Storytelling] At midnight, a letter appeared beneath the door of the old lighthouse, addressed to
+   seed: 330
+   Version 2 (sentence-level): the exclusive name of a whole and not a great way..., it is true that it is not a very important part of the same
+      output length: 30 generated token(s)
+      review flags: fixed 30-token cutoff; may end mid-sentence; formatting: repeated punctuation
+   Version 3 (paragraph-level): the right with his family. He was written in order to be a very successful way of a person who had been a woman, or she would be
+      output length: 30 generated token(s)
+      review flags: fixed 30-token cutoff; may end mid-sentence
+
+10. [Storytelling] The map led the two children through the forest to a wooden gate that
+   seed: 331
+   Version 2 (sentence-level): is the most common and important for the first time, but a lot of people who want to use their life... ' Catran
+      output length: 30 generated token(s)
+      review flags: fixed 30-token cutoff; may end mid-sentence; formatting: repeated punctuation
+   Version 3 (paragraph-level): was called the first. The same step is to a strong spot for the rest of the world. However, it was not a great difference in the
+      output length: 30 generated token(s)
+      review flags: word repeated 4+ times: the; fixed 30-token cutoff; may end mid-sentence

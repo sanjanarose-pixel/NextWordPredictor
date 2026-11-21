@@ -1,1034 +1,459 @@
-
-# ==========================================
+# ============================================================
 # NEXT WORD PREDICTOR
-# Step 1: Dataset and vocabulary preparation
-# ==========================================
-
-# Training dataset
-dataset = [
-    "The robot moved across the room",
-    "The robot walked into the room",
-    "The machine moved across the floor"
-]
-
-
-# STEP 1: Tokenization
-
-tokenized_sentences = []
-
-for sentence in dataset:
-    words = sentence.lower().split()
-    tokenized_sentences.append(words)
-
-
-# STEP 2: Create vocabulary
-
-vocabulary = []
-
-for sentence in tokenized_sentences:
-    for word in sentence:
-
-        if word not in vocabulary:
-            vocabulary.append(word)
-
-
-# STEP 3: Assign IDs to words
-
-word_to_id = {}
-
-for i in range(len(vocabulary)):
-    word_to_id[vocabulary[i]] = i
-
-
-id_to_word = {}
-
-for word in word_to_id:
-    word_id = word_to_id[word]
-    id_to_word[word_id] = word
-
-
-# STEP 4: Generate training examples
-# Use two words to predict the next word
-
-training_inputs = []
-training_targets = []
-
-for sentence in tokenized_sentences:
-
-    for i in range(len(sentence) - 2):
-
-        first_word = sentence[i]
-        second_word = sentence[i + 1]
-        next_word = sentence[i + 2]
-
-        first_id = word_to_id[first_word]
-        second_id = word_to_id[second_word]
-        target_id = word_to_id[next_word]
-
-        training_inputs.append([first_id, second_id])
-        training_targets.append(target_id)
-
-
-# STEP 5: Display results
-
-print("Vocabulary:", vocabulary)
-print("Word to ID:", word_to_id)
-print("ID to Word:", id_to_word)
-
-print("\nTraining inputs:", training_inputs)
-print("Training targets:", training_targets)
-
-print("\nTotal vocabulary size:", len(vocabulary))
-print("Total training examples:", len(training_inputs))
-
-
-# ==========================================
-# STEP 2: EMBEDDING LAYER
-# ==========================================
-
-import torch
-
-# Number of unique words
-vocabulary_size = len(vocabulary)
-
-# Number of values representing each word
-embedding_dimension = 4
-
-# Create embedding layer
-embedding_layer = torch.nn.Embedding(
-    vocabulary_size,
-    embedding_dimension
-)
-
-# Display embedding matrix
-print("\nEmbedding matrix:")
-print(embedding_layer.weight)
-
-# Display matrix shape
-print("\nMatrix shape:")
-print(embedding_layer.weight.shape)
-
-# Get embedding of "robot"
-robot_id = word_to_id["robot"]
-
-robot_embedding = embedding_layer(
-    torch.tensor(robot_id)
-)
-
-print("\nRobot ID:", robot_id)
-print("Robot embedding:", robot_embedding)
-# Get the IDs of the two input words
-first_word_id = word_to_id["the"]
-second_word_id = word_to_id["robot"]
-
-# Convert both IDs into tensors
-first_word_tensor = torch.tensor(first_word_id)
-second_word_tensor = torch.tensor(second_word_id)
-
-# Get their embeddings
-first_embedding = embedding_layer(first_word_tensor)
-second_embedding = embedding_layer(second_word_tensor)
-
-# Join both embeddings
-combined_embedding = torch.cat(
-    (first_embedding, second_embedding)
-)
-
-print("\nFirst word embedding:")
-print(first_embedding)
-
-print("\nSecond word embedding:")
-print(second_embedding)
-
-print("\nCombined embedding:")
-print(combined_embedding)
-
-print("\nCombined embedding shape:")
-print(combined_embedding.shape)
-
-# Neural network model
-
-class NextWordModel(torch.nn.Module):
-
-    def __init__(self, vocabulary_size, embedding_dimension):
-        super().__init__()
-
-        # Convert word IDs into vectors
-        self.embedding = torch.nn.Embedding(
-            vocabulary_size,
-            embedding_dimension
-        )
-
-        # Hidden layer: 8 inputs -> 16 neurons
-        self.hidden = torch.nn.Linear(
-            embedding_dimension * 2,
-            16
-        )
-
-        # Output layer: 16 neurons -> 9 scores
-        self.output = torch.nn.Linear(
-            16,
-            vocabulary_size
-        )
-
-    def forward(self, input_words):
-
-        # Get embeddings for both words
-        embeddings = self.embedding(input_words)
-
-        # Join the two embeddings
-        combined = embeddings.reshape(-1)
-
-        # Hidden layer
-        hidden_output = self.hidden(combined)
-
-        # ReLU activation
-        hidden_output = torch.relu(hidden_output)
-
-        # Output scores
-        scores = self.output(hidden_output)
-
-        return scores
-
-
-# Create the model
-model = NextWordModel(
-    vocabulary_size,
-    embedding_dimension
-)
-
-# Test the model
-test_input = torch.tensor([0, 1])
-
-scores = model(test_input)
-
-print("\nModel output scores:")
-print(scores)
-
-print("\nOutput shape:")
-print(scores.shape)
-# Convert training data into PyTorch tensors
-
-inputs = torch.tensor(training_inputs, dtype=torch.long)
-targets = torch.tensor(training_targets, dtype=torch.long)
-
-# Loss function
-loss_function = torch.nn.CrossEntropyLoss()
-
-# Optimizer
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-
-# Training loop
-epochs = 500
-
-for epoch in range(epochs):
-
-    # Get predictions for all training examples
-    predictions = []
-
-    for input_words in inputs:
-        scores = model(input_words)
-        predictions.append(scores)
-
-    predictions = torch.stack(predictions)
-
-    # Calculate loss
-    loss = loss_function(predictions, targets)
-
-    # Clear old gradients
-    optimizer.zero_grad()
-
-    # Backpropagation
-    loss.backward()
-
-    # Update model weights
-    optimizer.step()
-
-    if (epoch + 1) % 50 == 0:
-        print(f"Epoch {epoch + 1}, Loss: {loss.item():.4f}")
-# Test prediction
-
-test_input = torch.tensor([0, 1])
-
-with torch.no_grad():
-    scores = model(test_input)
-    probabilities = torch.softmax(scores, dim=0)
-
-    predicted_id = torch.argmax(probabilities).item()
-
-print("\nInput: the robot")
-print("Predicted next word:", id_to_word[predicted_id])
-print("Probabilities:", probabilities)
-# Generate multiple words
-
-def generate_text(starting_text, number_of_words):
-
-    words = starting_text.lower().split()
-
-    # Keep the last two words as context
-    for _ in range(number_of_words):
-
-        # Convert the last two words into IDs
-        input_ids = [
-            word_to_id[words[-2]],
-            word_to_id[words[-1]]
-        ]
-
-        input_tensor = torch.tensor(input_ids)
-
-        # Predict the next word
-        with torch.no_grad():
-            scores = model(input_tensor)
-            predicted_id = torch.argmax(scores).item()
-
-        # Convert ID back into a word
-        predicted_word = id_to_word[predicted_id]
-
-        # Add the predicted word
-        words.append(predicted_word)
-
-    return " ".join(words)
-
-
-# Test text generation
-
-print("\nGenerated text:")
-print(generate_text("the robot", 4))
-
+# A small decoder-only Transformer trained from scratch
+# ============================================================
+
+import json
+import math
 import re
+import torch
+import torch.nn as nn
 from collections import Counter
+from pathlib import Path
+
+# ----------------------------
+# 1. SETTINGS
+# ----------------------------
+
+TRAIN_FILE = "dataset.txt"
+VALIDATION_FILE = "validation.txt"
+
+VOCABULARY_LIMIT = 20000
+MIN_FREQUENCY = 2
+
+EMBEDDING_DIMENSION = 128
+CONTEXT_LENGTH = 64
+NUMBER_OF_HEADS = 4
+NUMBER_OF_BLOCKS = 2
+
+BATCH_SIZE = 4
+LEARNING_RATE = 0.0003
+EPOCHS = 5
+STEPS_PER_EPOCH = 100
+VALIDATION_BATCHES = 20
+
+CHECKPOINT_FILE = "language_model_checkpoint.pth"
+VOCAB_FILE = "vocabulary.json"
+
+torch.manual_seed(42)
+device = torch.device("cpu")
+print("Using device:", device)
 
 
-# STEP 1: Read the dataset
+# ----------------------------
+# 2. LOAD AND TOKENIZE DATA
+# ----------------------------
 
-with open("dataset.txt", "r", encoding="utf-8") as file:
-    dataset_text = file.read()
+def read_text(filename):
+    path = Path(filename)
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Could not find {filename}. Keep it in the same folder as language_model.py."
+        )
+    return path.read_text(encoding="utf-8")
 
-
-# STEP 2: Convert text into tokens
 
 def tokenize(text):
-
     text = text.lower()
-
-    # Clean special WikiText formatting
     text = text.replace("@-@", "-")
     text = text.replace("@,@", ",")
     text = text.replace("@.@", ".")
-
-    # Separate words and punctuation
-    tokens = re.findall(
-        r"\w+(?:['’]\w+)*|[^\w\s]",
-        text,
-        flags=re.UNICODE
-    )
-
-    return tokens
+    return re.findall(r"\w+(?:['’]\w+)*|[^\w\s]", text, flags=re.UNICODE)
 
 
-tokens = tokenize(dataset_text)
+print("\nLoading datasets...")
+training_text = read_text(TRAIN_FILE)
+validation_text = read_text(VALIDATION_FILE)
+
+training_tokens = tokenize(training_text)
+validation_tokens = tokenize(validation_text)
+
+print("Training tokens:", len(training_tokens))
+print("Validation tokens:", len(validation_tokens))
 
 
-# STEP 3: Count word frequencies
+# ----------------------------
+# 3. BUILD VOCABULARY
+#    Vocabulary is built ONLY from training data.
+# ----------------------------
 
-word_counts = Counter(tokens)
-
-
-# STEP 4: Build vocabulary
-
-
-min_frequency = 2
-max_vocab_size = 20000
+word_counts = Counter(training_tokens)
 
 vocabulary = ["<unk>"]
-
 for word, count in word_counts.most_common():
-
-    if count < min_frequency:
+    if count < MIN_FREQUENCY:
         break
-
-    if len(vocabulary) >= max_vocab_size:
+    if len(vocabulary) >= VOCABULARY_LIMIT:
         break
-
     vocabulary.append(word)
 
+word_to_id = {word: index for index, word in enumerate(vocabulary)}
+id_to_word = {index: word for word, index in word_to_id.items()}
 
-
-# STEP 5: Assign numerical IDs
-
-word_to_id = {
-    word: index
-    for index, word in enumerate(vocabulary)
-}
-
-id_to_word = {
-    index: word
-    for word, index in word_to_id.items()
-}
-
-
-# STEP 6: Convert tokens into numerical IDs
-
-def encode(words):
-
-    return [
-        word_to_id.get(word, word_to_id["<unk>"])
-        for word in words
-    ]
-
-
-# STEP 7: Convert numerical IDs back into words
+def encode(tokens):
+    unknown_id = word_to_id["<unk>"]
+    return [word_to_id.get(token, unknown_id) for token in tokens]
 
 def decode(token_ids):
+    return [id_to_word.get(int(token_id), "<unk>") for token_id in token_ids]
 
-    return [
-        id_to_word.get(token_id, "<unk>")
-        for token_id in token_ids
-    ]
+training_ids = torch.tensor(encode(training_tokens), dtype=torch.long)
+validation_ids = torch.tensor(encode(validation_tokens), dtype=torch.long)
 
-
-# STEP 8: Display results
-
-encoded_sample = encode(tokens[:20])
-
-print("\nTOKENIZER RESULTS")
-print("------------------------")
-
-print("Total characters:", len(dataset_text))
-print("Total tokens:", len(tokens))
-print("Unique words:", len(word_counts))
-print("Vocabulary size:", len(vocabulary))
-
-print("\nOriginal tokens:")
-print(tokens[:20])
-
-print("\nNumerical representation:")
-print(encoded_sample)
-
-print("\nDecoded representation:")
-print(decode(encoded_sample))
-
-import torch
-from torch.utils.data import Dataset
-
-
-# STEP 9: Load all three datasets
-
-with open("validation.txt", "r", encoding="utf-8") as file:
-    validation_text = file.read()
-
-with open("test.txt", "r", encoding="utf-8") as file:
-    test_text = file.read()
-
-
-# STEP 10: Tokenize and encode each dataset
-
-training_ids = encode(tokenize(dataset_text))
-validation_ids = encode(tokenize(validation_text))
-test_ids = encode(tokenize(test_text))
-
-
-# STEP 11: Define the context window
-
-context_length = 64
-
-
-# STEP 12: Create a dataset of input-target pairs
-
-class NextTokenDataset(Dataset):
-
-    def __init__(self, token_ids, context_length):
-        self.token_ids = token_ids
-        self.context_length = context_length
-
-    def __len__(self):
-        return len(self.token_ids) - self.context_length
-
-    def __getitem__(self, index):
-
-        input_sequence = self.token_ids[
-            index:index + self.context_length
-        ]
-
-        target_sequence = self.token_ids[
-            index + 1:index + self.context_length + 1
-        ]
-
-        return (
-            torch.tensor(input_sequence, dtype=torch.long),
-            torch.tensor(target_sequence, dtype=torch.long)
-        )
-
-
-# STEP 13: Create training, validation and test datasets
-
-train_dataset = NextTokenDataset(
-    training_ids, context_length
-)
-
-validation_dataset = NextTokenDataset(
-    validation_ids, context_length
-)
-
-test_dataset = NextTokenDataset(
-    test_ids, context_length
-)
-
-
-# STEP 14: Display results
-
-print("\nSEQUENCE PREPARATION RESULTS")
-print("-----------------------------")
-
-print("Training tokens:", len(training_ids))
-print("Validation tokens:", len(validation_ids))
-print("Test tokens:", len(test_ids))
-
-print("Training examples:", len(train_dataset))
-print("Validation examples:", len(validation_dataset))
-print("Test examples:", len(test_dataset))
-
-sample_input, sample_target = train_dataset[0]
-
-print("\nFirst input sequence:")
-print(decode(sample_input.tolist()))
-
-print("\nFirst target sequence:")
-print(decode(sample_target.tolist()))
-
-# ==========================================
-# TRANSFORMER - EMBEDDING LAYER
-# ==========================================
-
-import torch
-
-# Model configuration
 vocabulary_size = len(vocabulary)
-embedding_dimension = 128
-model_context_length = 64
 
-# Create token embeddings
-token_embedding = torch.nn.Embedding(
-    vocabulary_size,
-    embedding_dimension
-)
-
-# Create positional embeddings
-position_embedding = torch.nn.Embedding(
-    model_context_length,
-    embedding_dimension
-)
-
-# Get one training example
-sample_input, sample_target = train_dataset[0]
-
-# Use the first 64 tokens
-sample_input = sample_input[:model_context_length]
-
-# Convert token IDs into vectors
-token_vectors = token_embedding(sample_input)
-
-# Create position numbers: 0, 1, 2, ... 63
-positions = torch.arange(model_context_length)
-
-# Convert positions into vectors
-position_vectors = position_embedding(positions)
-
-# Combine both embeddings
-input_embeddings = token_vectors + position_vectors
-
-print("\nEMBEDDING RESULTS")
-print("-----------------")
+print("\nVOCABULARY")
+print("----------")
+print("Unique training words:", len(word_counts))
 print("Vocabulary size:", vocabulary_size)
-print("Embedding dimension:", embedding_dimension)
-print("Context length:", model_context_length)
-
-print("Token embedding shape:", token_vectors.shape)
-print("Position embedding shape:", position_vectors.shape)
-print("Final embedding shape:", input_embeddings.shape)
 
 
-# ==========================================
-# TRANSFORMER - MULTI HEAD ATTENTION
-# ==========================================
+# ----------------------------
+# 4. CREATE RANDOM TRAINING BATCHES
+#    Each row is a context and its one-token-shifted target.
+# ----------------------------
 
-import math
+if len(training_ids) <= CONTEXT_LENGTH + 1:
+    raise ValueError("Training text is too short for the selected context length.")
 
-class MultiHeadAttention(torch.nn.Module):
+if len(validation_ids) <= CONTEXT_LENGTH + 1:
+    raise ValueError("Validation text is too short for the selected context length.")
 
+training_windows = training_ids.unfold(0, CONTEXT_LENGTH + 1, 1)
+validation_windows = validation_ids.unfold(0, CONTEXT_LENGTH + 1, 1)
+
+def get_training_batch():
+    indices = torch.randint(0, len(training_windows), (BATCH_SIZE,))
+    batch = training_windows[indices]
+    inputs = batch[:, :-1].contiguous()
+    targets = batch[:, 1:].contiguous()
+    return inputs, targets
+
+def get_validation_batch(batch_number):
+    # Use different, consecutive validation windows for each batch.
+    start = batch_number * BATCH_SIZE
+    end = start + BATCH_SIZE
+    if end > len(validation_windows):
+        start = max(0, len(validation_windows) - BATCH_SIZE)
+        end = start + BATCH_SIZE
+    batch = validation_windows[start:end]
+    inputs = batch[:, :-1].contiguous()
+    targets = batch[:, 1:].contiguous()
+    return inputs, targets
+
+
+# ----------------------------
+# 5. TRANSFORMER COMPONENTS
+# ----------------------------
+
+class MultiHeadAttention(nn.Module):
     def __init__(self, embedding_dimension, number_of_heads):
-
         super().__init__()
+
+        if embedding_dimension % number_of_heads != 0:
+            raise ValueError("Embedding dimension must be divisible by number of heads.")
 
         self.number_of_heads = number_of_heads
         self.head_dimension = embedding_dimension // number_of_heads
 
-        # Query, Key and Value layers
-        self.query = torch.nn.Linear(
-            embedding_dimension, embedding_dimension
-        )
-
-        self.key = torch.nn.Linear(
-            embedding_dimension, embedding_dimension
-        )
-
-        self.value = torch.nn.Linear(
-            embedding_dimension, embedding_dimension
-        )
-
-        # Combine the outputs of all heads
-        self.output_layer = torch.nn.Linear(
-            embedding_dimension, embedding_dimension
-        )
+        self.query = nn.Linear(embedding_dimension, embedding_dimension)
+        self.key = nn.Linear(embedding_dimension, embedding_dimension)
+        self.value = nn.Linear(embedding_dimension, embedding_dimension)
+        self.output_layer = nn.Linear(embedding_dimension, embedding_dimension)
 
     def forward(self, x):
-
         batch_size, sequence_length, embedding_dimension = x.shape
 
-        # Generate Query, Key and Value
-        Q = self.query(x)
-        K = self.key(x)
-        V = self.value(x)
+        q = self.query(x)
+        k = self.key(x)
+        v = self.value(x)
 
-        # Divide features among attention heads
-        Q = Q.view(
-            batch_size, sequence_length,
-            self.number_of_heads, self.head_dimension
-        )
+        q = q.view(batch_size, sequence_length, self.number_of_heads, self.head_dimension)
+        k = k.view(batch_size, sequence_length, self.number_of_heads, self.head_dimension)
+        v = v.view(batch_size, sequence_length, self.number_of_heads, self.head_dimension)
 
-        K = K.view(
-            batch_size, sequence_length,
-            self.number_of_heads, self.head_dimension
-        )
+        q = q.transpose(1, 2)
+        k = k.transpose(1, 2)
+        v = v.transpose(1, 2)
 
-        V = V.view(
-            batch_size, sequence_length,
-            self.number_of_heads, self.head_dimension
-        )
-
-        # Move heads before sequence dimension
-        Q = Q.transpose(1, 2)
-        K = K.transpose(1, 2)
-        V = V.transpose(1, 2)
-
-        # Calculate attention scores
-        scores = Q @ K.transpose(-2, -1)
-
+        scores = q @ k.transpose(-2, -1)
         scores = scores / math.sqrt(self.head_dimension)
 
-        # Causal mask
+        # A token can attend to itself and earlier tokens, never future tokens.
         mask = torch.triu(
-            torch.ones(sequence_length, sequence_length),
+            torch.ones(sequence_length, sequence_length, device=x.device),
             diagonal=1
         ).bool()
 
         scores = scores.masked_fill(mask, float("-inf"))
-
-        # Attention probabilities
         attention_weights = torch.softmax(scores, dim=-1)
+        output = attention_weights @ v
 
-        # Combine values
-        output = attention_weights @ V
-
-        # Join all attention heads
         output = output.transpose(1, 2).contiguous()
+        output = output.view(batch_size, sequence_length, embedding_dimension)
 
-        output = output.view(
-            batch_size, sequence_length, embedding_dimension
-        )
-
-        # Final projection
-        output = self.output_layer(output)
-
-        return output
+        return self.output_layer(output)
 
 
-# Create multi-head attention
-attention_layer = MultiHeadAttention(
-    embedding_dimension=128,
-    number_of_heads=4
-)
-
-# Test it
-sample_embeddings = input_embeddings.unsqueeze(0)
-
-attention_output = attention_layer(sample_embeddings)
-
-print("\nMULTI HEAD ATTENTION RESULTS")
-print("----------------------------")
-print("Number of heads:", 4)
-print("Features per head:", 32)
-print("Input shape:", sample_embeddings.shape)
-print("Output shape:", attention_output.shape)
-
-
-# ==========================================
-# TRANSFORMER - FEED FORWARD NETWORK
-# ==========================================
-
-class FeedForward(torch.nn.Module):
-
+class FeedForward(nn.Module):
     def __init__(self, embedding_dimension):
-
         super().__init__()
-
-        self.network = torch.nn.Sequential(
-
-            # Expand 128 features to 512
-            torch.nn.Linear(
-                embedding_dimension,
-                embedding_dimension * 4
-            ),
-
-            # Activation function
-            torch.nn.ReLU(),
-
-            # Reduce 512 features back to 128
-            torch.nn.Linear(
-                embedding_dimension * 4,
-                embedding_dimension
-            )
+        self.network = nn.Sequential(
+            nn.Linear(embedding_dimension, embedding_dimension * 4),
+            nn.ReLU(),
+            nn.Linear(embedding_dimension * 4, embedding_dimension)
         )
 
     def forward(self, x):
-
         return self.network(x)
 
 
-# Create feed-forward network
-feed_forward = FeedForward(embedding_dimension=128)
-
-# Pass attention output through it
-feed_forward_output = feed_forward(attention_output)
-
-print("\nFEED FORWARD RESULTS")
-print("--------------------")
-print("Input shape:", attention_output.shape)
-print("Output shape:", feed_forward_output.shape)
-
-# ==========================================
-# TRANSFORMER - COMPLETE BLOCK
-# ==========================================
-
-class TransformerBlock(torch.nn.Module):
-
+class TransformerBlock(nn.Module):
     def __init__(self, embedding_dimension, number_of_heads):
-
         super().__init__()
-
-        # Multi-head attention
-        self.attention = MultiHeadAttention(
-            embedding_dimension,
-            number_of_heads
-        )
-
-        # Feed-forward network
-        self.feed_forward = FeedForward(
-            embedding_dimension
-        )
-
-        # Layer normalization
-        self.norm1 = torch.nn.LayerNorm(
-            embedding_dimension
-        )
-
-        self.norm2 = torch.nn.LayerNorm(
-            embedding_dimension
-        )
+        self.attention = MultiHeadAttention(embedding_dimension, number_of_heads)
+        self.feed_forward = FeedForward(embedding_dimension)
+        self.norm1 = nn.LayerNorm(embedding_dimension)
+        self.norm2 = nn.LayerNorm(embedding_dimension)
 
     def forward(self, x):
-
-        # Attention and residual connection
-        attention_output = self.attention(x)
-
-        x = self.norm1(x + attention_output)
-
-        # Feed-forward and residual connection
-        feed_forward_output = self.feed_forward(x)
-
-        x = self.norm2(x + feed_forward_output)
-
+        x = self.norm1(x + self.attention(x))
+        x = self.norm2(x + self.feed_forward(x))
         return x
 
 
-# Create one Transformer block
-transformer_block = TransformerBlock(
-    embedding_dimension=128,
-    number_of_heads=4
-)
-
-# Test the block
-transformer_output = transformer_block(sample_embeddings)
-
-print("\nTRANSFORMER BLOCK RESULTS")
-print("-------------------------")
-print("Input shape:", sample_embeddings.shape)
-print("Output shape:", transformer_output.shape)
-
-# ==========================================
-# COMPLETE TRANSFORMER LANGUAGE MODEL
-# ==========================================
-
-class LanguageModel(torch.nn.Module):
-
-    def __init__(self, vocabulary_size, embedding_dimension,
-                 context_length, number_of_heads, number_of_blocks):
-
+class LanguageModel(nn.Module):
+    def __init__(
+        self,
+        vocabulary_size,
+        embedding_dimension,
+        context_length,
+        number_of_heads,
+        number_of_blocks
+    ):
         super().__init__()
-
         self.context_length = context_length
 
-        self.token_embedding = torch.nn.Embedding(
-            vocabulary_size, embedding_dimension
-        )
+        self.token_embedding = nn.Embedding(vocabulary_size, embedding_dimension)
+        self.position_embedding = nn.Embedding(context_length, embedding_dimension)
 
-        self.position_embedding = torch.nn.Embedding(
-            context_length, embedding_dimension
-        )
-
-        self.transformer_blocks = torch.nn.Sequential(
+        self.transformer_blocks = nn.Sequential(
             *[
                 TransformerBlock(embedding_dimension, number_of_heads)
                 for _ in range(number_of_blocks)
             ]
         )
 
-        self.final_norm = torch.nn.LayerNorm(embedding_dimension)
-
-        self.output_layer = torch.nn.Linear(
-            embedding_dimension, vocabulary_size
-        )
+        self.final_norm = nn.LayerNorm(embedding_dimension)
+        self.output_layer = nn.Linear(embedding_dimension, vocabulary_size)
 
     def forward(self, input_ids):
-
         batch_size, sequence_length = input_ids.shape
 
-        # Token embeddings
+        if sequence_length > self.context_length:
+            raise ValueError("Input sequence is longer than the model context length.")
+
         token_vectors = self.token_embedding(input_ids)
-
-        # Positional embeddings
-        positions = torch.arange(
-            sequence_length, device=input_ids.device
-        )
-
+        positions = torch.arange(sequence_length, device=input_ids.device)
         position_vectors = self.position_embedding(positions)
 
-        # Combine embeddings
         x = token_vectors + position_vectors
-
-        # Transformer blocks
         x = self.transformer_blocks(x)
-
-        # Final normalization
         x = self.final_norm(x)
 
-        # Predict scores for every vocabulary token
-        logits = self.output_layer(x)
-
-        return logits
+        return self.output_layer(x)
 
 
-# ==========================================
-# TEST COMPLETE MODEL
-# ==========================================
+# ----------------------------
+# 6. CREATE MODEL AND OPTIMIZER
+# ----------------------------
 
 model = LanguageModel(
-    vocabulary_size=20000,
-    embedding_dimension=128,
-    context_length=64,
-    number_of_heads=4,
-    number_of_blocks=2
-)
+    vocabulary_size=vocabulary_size,
+    embedding_dimension=EMBEDDING_DIMENSION,
+    context_length=CONTEXT_LENGTH,
+    number_of_heads=NUMBER_OF_HEADS,
+    number_of_blocks=NUMBER_OF_BLOCKS
+).to(device)
 
-sample_ids = torch.tensor(
-    [train_dataset[0][0][:64].tolist()]
-)
+parameter_count = sum(parameter.numel() for parameter in model.parameters())
 
-predictions = model(sample_ids)
+print("\nMODEL")
+print("-----")
+print("Parameters:", f"{parameter_count:,}")
+print("Context length:", CONTEXT_LENGTH)
+print("Embedding dimension:", EMBEDDING_DIMENSION)
+print("Transformer blocks:", NUMBER_OF_BLOCKS)
+print("Attention heads:", NUMBER_OF_HEADS)
 
-print("\nCOMPLETE LANGUAGE MODEL")
-print("-----------------------")
-print("Input shape:", sample_ids.shape)
-print("Prediction shape:", predictions.shape)
-print("Total parameters:", sum(p.numel() for p in model.parameters()))
+loss_function = nn.CrossEntropyLoss()
+optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
 
 
-# ==========================================
-# TRAINING THE LANGUAGE MODEL
-# ==========================================
+# ----------------------------
+# 7. TRAINING AND VALIDATION
+# ----------------------------
 
-from torch.utils.data import DataLoader
+best_validation_loss = float("inf")
 
-# Training settings
-batch_size = 4
-learning_rate = 0.0003
-training_batches = 20
-validation_batches = 5
+print("\nSTARTING TRAINING")
+print("-----------------")
+print(f"Epochs: {EPOCHS} | Training steps per epoch: {STEPS_PER_EPOCH}")
 
-# Create data loaders
-train_loader = DataLoader(
-    train_dataset,
-    batch_size=batch_size,
-    shuffle=True
-)
+for epoch in range(EPOCHS):
+    model.train()
+    total_training_loss = 0.0
 
-validation_loader = DataLoader(
-    validation_dataset,
-    batch_size=batch_size,
-    shuffle=False
-)
-
-# Loss function
-loss_function = torch.nn.CrossEntropyLoss()
-
-# Optimizer
-optimizer = torch.optim.AdamW(
-    model.parameters(),
-    lr=learning_rate
-)
-
-# ==========================================
-# TRAINING
-# ==========================================
-
-model.train()
-total_loss = 0
-
-for batch_number, (inputs, targets) in enumerate(train_loader):
-
-    # Forward pass
-    predictions = model(inputs)
-
-    # Calculate loss
-    loss = loss_function(
-        predictions.reshape(-1, vocabulary_size),
-        targets.reshape(-1)
-    )
-
-    # Clear previous gradients
-    optimizer.zero_grad()
-
-    # Backpropagation
-    loss.backward()
-
-    # Prevent excessively large gradients
-    torch.nn.utils.clip_grad_norm_(
-        model.parameters(), max_norm=1.0
-    )
-
-    # Update weights
-    optimizer.step()
-
-    total_loss += loss.item()
-
-    if (batch_number + 1) % 5 == 0:
-        print(
-            f"Training batch {batch_number + 1}/{training_batches}, "
-            f"Loss: {loss.item():.4f}"
-        )
-
-    if batch_number + 1 >= training_batches:
-        break
-
-average_training_loss = total_loss / training_batches
-
-print("\nTRAINING COMPLETED")
-print("------------------")
-print(f"Average training loss: {average_training_loss:.4f}")
-
-# ==========================================
-# VALIDATION
-# ==========================================
-
-model.eval()
-total_validation_loss = 0
-
-with torch.no_grad():
-
-    for batch_number, (inputs, targets) in enumerate(validation_loader):
+    for step in range(STEPS_PER_EPOCH):
+        inputs, targets = get_training_batch()
+        inputs = inputs.to(device)
+        targets = targets.to(device)
 
         predictions = model(inputs)
-
         loss = loss_function(
             predictions.reshape(-1, vocabulary_size),
             targets.reshape(-1)
         )
 
-        total_validation_loss += loss.item()
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+        optimizer.step()
 
-        if batch_number + 1 >= validation_batches:
-            break
+        total_training_loss += loss.item()
 
-average_validation_loss = (
-    total_validation_loss / validation_batches
-)
+        if (step + 1) % 20 == 0:
+            print(
+                f"Epoch {epoch + 1}/{EPOCHS} | "
+                f"Step {step + 1}/{STEPS_PER_EPOCH} | "
+                f"Loss: {loss.item():.4f}"
+            )
 
-print("\nVALIDATION RESULTS")
-print("------------------")
-print(f"Average validation loss: {average_validation_loss:.4f}")
+    average_training_loss = total_training_loss / STEPS_PER_EPOCH
 
-# ==========================================
-# SAVE TRAINED MODEL
-# ==========================================
-
-torch.save(model.state_dict(), "language_model.pth")
-
-print("\nModel weights saved successfully!")
-
-import re
-
-def generate_text(prompt, number_of_words=20, context_window=32, temperature=1.0):
     model.eval()
-
-    if context_window < 1 or context_window > model.context_length:
-        raise ValueError(f"Context window must be between 1 and {model.context_length}.")
-
-    prompt_tokens = tokenize(prompt)
-    input_ids = encode(prompt_tokens)
-
-    if not input_ids:
-        raise ValueError("Please enter a prompt.")
-
-    generated_ids = input_ids.copy()
+    total_validation_loss = 0.0
 
     with torch.no_grad():
-        for _ in range(number_of_words):
+        for batch_number in range(VALIDATION_BATCHES):
+            inputs, targets = get_validation_batch(batch_number)
+            inputs = inputs.to(device)
+            targets = targets.to(device)
+
+            predictions = model(inputs)
+            loss = loss_function(
+                predictions.reshape(-1, vocabulary_size),
+                targets.reshape(-1)
+            )
+            total_validation_loss += loss.item()
+
+    average_validation_loss = total_validation_loss / VALIDATION_BATCHES
+
+    print(f"\nEpoch {epoch + 1} results")
+    print(f"Average training loss:   {average_training_loss:.4f}")
+    print(f"Average validation loss: {average_validation_loss:.4f}")
+
+    # Save the best model seen so far.
+    if average_validation_loss < best_validation_loss:
+        best_validation_loss = average_validation_loss
+
+        torch.save(
+            {
+                "model_state_dict": model.state_dict(),
+                "optimizer_state_dict": optimizer.state_dict(),
+                "epoch": epoch + 1,
+                "validation_loss": best_validation_loss,
+                "config": {
+                    "vocabulary_size": vocabulary_size,
+                    "embedding_dimension": EMBEDDING_DIMENSION,
+                    "context_length": CONTEXT_LENGTH,
+                    "number_of_heads": NUMBER_OF_HEADS,
+                    "number_of_blocks": NUMBER_OF_BLOCKS
+                }
+            },
+            CHECKPOINT_FILE
+        )
+
+        with open(VOCAB_FILE, "w", encoding="utf-8") as file:
+            json.dump(vocabulary, file, ensure_ascii=False)
+
+        print("Best checkpoint saved.")
+
+print("\nTRAINING FINISHED")
+print("-----------------")
+print(f"Best validation loss: {best_validation_loss:.4f}")
+
+
+# ----------------------------
+# 8. LOAD BEST CHECKPOINT
+# ----------------------------
+
+checkpoint = torch.load(CHECKPOINT_FILE, map_location=device, weights_only=False)
+model.load_state_dict(checkpoint["model_state_dict"])
+model.eval()
+
+
+# ----------------------------
+# 9. TEXT GENERATION
+# ----------------------------
+
+def generate_text(prompt, number_of_tokens=30, context_window=32,
+                  temperature=0.8, top_k=20):
+    if temperature <= 0:
+        raise ValueError("Temperature must be greater than zero.")
+
+    if context_window < 1 or context_window > model.context_length:
+        raise ValueError(
+            f"Context window must be between 1 and {model.context_length}."
+        )
+
+    prompt_tokens = tokenize(prompt)
+    generated_ids = encode(prompt_tokens)
+
+    if not generated_ids:
+        raise ValueError("Please enter a prompt containing at least one token.")
+
+    with torch.no_grad():
+        for _ in range(number_of_tokens):
             context = generated_ids[-context_window:]
+            input_tensor = torch.tensor([context], dtype=torch.long, device=device)
 
-            input_tensor = torch.tensor([context], dtype=torch.long)
+            logits = model(input_tensor)[0, -1, :]
+            logits = logits / temperature
 
-            predictions = model(input_tensor)
+            # Keep only the top-k most likely next tokens.
+            if top_k is not None and 0 < top_k < vocabulary_size:
+                top_values, _ = torch.topk(logits, top_k)
+                cutoff = top_values[-1]
+                logits[logits < cutoff] = float("-inf")
 
-            next_token_logits = predictions[0, -1, :]
-
-            next_token_logits = next_token_logits / temperature
-
-            probabilities = torch.softmax(next_token_logits, dim=-1)
-
+            probabilities = torch.softmax(logits, dim=-1)
             next_token_id = torch.multinomial(probabilities, num_samples=1).item()
-
             generated_ids.append(next_token_id)
 
     generated_tokens = decode(generated_ids)
-
     result = " ".join(generated_tokens)
-
     result = re.sub(r"\s+([.,!?;:%)\]])", r"\1", result)
     result = re.sub(r"([(])\s+", r"\1", result)
-
     return result
 
 
-print("\nTEXT GENERATION")
-print("----------------")
+# ----------------------------
+# 10. GENERATION TEST
+# ----------------------------
 
-prompt = "The history of science"
+test_prompt = "The history of science"
 
-result = generate_text(
-    prompt,
-    number_of_words=20,
-    context_window=32
+print("\nTEXT GENERATION TEST")
+print("--------------------")
+print("Prompt:", test_prompt)
+
+generated_text = generate_text(
+    test_prompt,
+    number_of_tokens=30,
+    context_window=32,
+    temperature=0.8,
+    top_k=20
 )
 
-print("Prompt:", prompt)
-print("Generated text:", result)
+print("Generated text:", generated_text)

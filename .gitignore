@@ -1,9 +1,25 @@
+# Local environment and Python cache
 .venv/
 __pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Source and prepared corpora are not distributed with the model artifacts
 dataset.txt
 validation.txt
 test.txt
-*.pyc
+high_quality_train.txt.gz
+high_quality_test.txt.gz
+v3_fineweb_edu_sample_013.parquet
+v3_train.txt
+v3_validation.txt
+v3_test.txt
+data/v4/raw/
+data/v4/prepared/
+
+# Keep checkpoints local by default; approved project checkpoints are added explicitly
 *.pth
-*.pth
-*.pth
+
+# Local secrets
+.env
+.streamlit/secrets.toml

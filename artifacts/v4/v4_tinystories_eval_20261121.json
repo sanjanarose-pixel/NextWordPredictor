@@ -1,0 +1,328 @@
+{
+  "settings": {
+    "temperature": 0.8,
+    "top_k": 40,
+    "max_new_tokens": 48,
+    "min_new_words": 5,
+    "max_new_words": 9,
+    "seed_base": 800
+  },
+  "samples": [
+    {
+      "prompt": "Once upon a time, there was a little girl who",
+      "output": "Once upon a time, there was a little girl who loved to play outside. She liked to read her",
+      "repetition": {
+        "word_count": 19,
+        "unique_trigram_ratio": 1.0,
+        "repeated_trigram_count": 0,
+        "longest_word_run": 1
+      },
+      "surface_checks": {
+        "sentence_count": 2,
+        "prompt_lexical_overlap": 0.0,
+        "fragment_like_sentences": 0,
+        "repeated_punctuation": false,
+        "unbalanced_curly_quotes": false,
+        "continuation_word_count": 8,
+        "empty_continuation": false
+      }
+    },
+    {
+      "prompt": "One morning, a rabbit found a strange key",
+      "output": "One morning, a rabbit found a strange key in the sky. It was very pretty, but it",
+      "repetition": {
+        "word_count": 17,
+        "unique_trigram_ratio": 1.0,
+        "repeated_trigram_count": 0,
+        "longest_word_run": 1
+      },
+      "surface_checks": {
+        "sentence_count": 2,
+        "prompt_lexical_overlap": 0.0,
+        "fragment_like_sentences": 0,
+        "repeated_punctuation": false,
+        "unbalanced_curly_quotes": false,
+        "continuation_word_count": 8,
+        "empty_continuation": false
+      }
+    },
+    {
+      "prompt": "A little boy went into the forest and",
+      "output": "A little boy went into the forest and took it back away.\nTim looked down and started",
+      "repetition": {
+        "word_count": 17,
+        "unique_trigram_ratio": 1.0,
+        "repeated_trigram_count": 0,
+        "longest_word_run": 1
+      },
+      "surface_checks": {
+        "sentence_count": 2,
+        "prompt_lexical_overlap": 0.125,
+        "fragment_like_sentences": 0,
+        "repeated_punctuation": false,
+        "unbalanced_curly_quotes": false,
+        "continuation_word_count": 9,
+        "empty_continuation": false
+      }
+    },
+    {
+      "prompt": "The old man had a secret that",
+      "output": "The old man had a secret that it was not very heavy.\nThe old bird said,",
+      "repetition": {
+        "word_count": 16,
+        "unique_trigram_ratio": 1.0,
+        "repeated_trigram_count": 0,
+        "longest_word_run": 1
+      },
+      "surface_checks": {
+        "sentence_count": 2,
+        "prompt_lexical_overlap": 0.286,
+        "fragment_like_sentences": 0,
+        "repeated_punctuation": false,
+        "unbalanced_curly_quotes": false,
+        "continuation_word_count": 9,
+        "empty_continuation": false
+      }
+    },
+    {
+      "prompt": "One day, a small robot decided to",
+      "output": "One day, a small robot decided to go to the park. The car would sit on",
+      "repetition": {
+        "word_count": 16,
+        "unique_trigram_ratio": 1.0,
+        "repeated_trigram_count": 0,
+        "longest_word_run": 1
+      },
+      "surface_checks": {
+        "sentence_count": 2,
+        "prompt_lexical_overlap": 0.143,
+        "fragment_like_sentences": 0,
+        "repeated_punctuation": false,
+        "unbalanced_curly_quotes": false,
+        "continuation_word_count": 8,
+        "empty_continuation": false
+      }
+    },
+    {
+      "prompt": "The princess opened the mysterious box and",
+      "output": "The princess opened the mysterious box and saw a big tree. The busy was very sad.",
+      "repetition": {
+        "word_count": 16,
+        "unique_trigram_ratio": 1.0,
+        "repeated_trigram_count": 0,
+        "longest_word_run": 1
+      },
+      "surface_checks": {
+        "sentence_count": 2,
+        "prompt_lexical_overlap": 0.167,
+        "fragment_like_sentences": 0,
+        "repeated_punctuation": false,
+        "unbalanced_curly_quotes": false,
+        "continuation_word_count": 9,
+        "empty_continuation": false
+      }
+    },
+    {
+      "prompt": "A little bird fell from its nest",
+      "output": "A little bird fell from its nest and said, \"Mia! I am not bored, but it",
+      "repetition": {
+        "word_count": 16,
+        "unique_trigram_ratio": 1.0,
+        "repeated_trigram_count": 0,
+        "longest_word_run": 1
+      },
+      "surface_checks": {
+        "sentence_count": 2,
+        "prompt_lexical_overlap": 0.0,
+        "fragment_like_sentences": 0,
+        "repeated_punctuation": false,
+        "unbalanced_curly_quotes": true,
+        "continuation_word_count": 9,
+        "empty_continuation": false
+      }
+    },
+    {
+      "prompt": "Deep inside the forest, there lived",
+      "output": "Deep inside the forest, there lived a little boy named Tim. Tim loved to share",
+      "repetition": {
+        "word_count": 15,
+        "unique_trigram_ratio": 1.0,
+        "repeated_trigram_count": 0,
+        "longest_word_run": 2
+      },
+      "surface_checks": {
+        "sentence_count": 2,
+        "prompt_lexical_overlap": 0.0,
+        "fragment_like_sentences": 0,
+        "repeated_punctuation": false,
+        "unbalanced_curly_quotes": false,
+        "continuation_word_count": 8,
+        "empty_continuation": false
+      }
+    },
+    {
+      "prompt": "The little dog followed the sound",
+      "output": "The little dog followed the sound and had a long stick to play with them.",
+      "repetition": {
+        "word_count": 15,
+        "unique_trigram_ratio": 1.0,
+        "repeated_trigram_count": 0,
+        "longest_word_run": 1
+      },
+      "surface_checks": {
+        "sentence_count": 1,
+        "prompt_lexical_overlap": 0.0,
+        "fragment_like_sentences": 0,
+        "repeated_punctuation": false,
+        "unbalanced_curly_quotes": false,
+        "continuation_word_count": 9,
+        "empty_continuation": false
+      }
+    },
+    {
+      "prompt": "When the sun went down, the children",
+      "output": "When the sun went down, the children was gone. The tree was very happy and tired.",
+      "repetition": {
+        "word_count": 16,
+        "unique_trigram_ratio": 1.0,
+        "repeated_trigram_count": 0,
+        "longest_word_run": 1
+      },
+      "surface_checks": {
+        "sentence_count": 2,
+        "prompt_lexical_overlap": 0.167,
+        "fragment_like_sentences": 0,
+        "repeated_punctuation": false,
+        "unbalanced_curly_quotes": false,
+        "continuation_word_count": 8,
+        "empty_continuation": false
+      }
+    },
+    {
+      "prompt": "A tiny dragon was afraid of the dark, so",
+      "output": "A tiny dragon was afraid of the dark, so he jumped up and looked at the bird in",
+      "repetition": {
+        "word_count": 18,
+        "unique_trigram_ratio": 1.0,
+        "repeated_trigram_count": 0,
+        "longest_word_run": 1
+      },
+      "surface_checks": {
+        "sentence_count": 1,
+        "prompt_lexical_overlap": 0.111,
+        "fragment_like_sentences": 0,
+        "repeated_punctuation": false,
+        "unbalanced_curly_quotes": false,
+        "continuation_word_count": 9,
+        "empty_continuation": false
+      }
+    },
+    {
+      "prompt": "Mia and her brother found a map under the bed",
+      "output": "Mia and her brother found a map under the bed and said, \"You were the best friend?\" \nThe little",
+      "repetition": {
+        "word_count": 19,
+        "unique_trigram_ratio": 1.0,
+        "repeated_trigram_count": 0,
+        "longest_word_run": 1
+      },
+      "surface_checks": {
+        "sentence_count": 1,
+        "prompt_lexical_overlap": 0.2,
+        "fragment_like_sentences": 0,
+        "repeated_punctuation": false,
+        "unbalanced_curly_quotes": false,
+        "continuation_word_count": 8,
+        "empty_continuation": false
+      }
+    },
+    {
+      "prompt": "The friendly monster knocked on the door and",
+      "output": "The friendly monster knocked on the door and came away.\nThe bird was very happy that the",
+      "repetition": {
+        "word_count": 17,
+        "unique_trigram_ratio": 1.0,
+        "repeated_trigram_count": 0,
+        "longest_word_run": 1
+      },
+      "surface_checks": {
+        "sentence_count": 2,
+        "prompt_lexical_overlap": 0.143,
+        "fragment_like_sentences": 0,
+        "repeated_punctuation": false,
+        "unbalanced_curly_quotes": false,
+        "continuation_word_count": 8,
+        "empty_continuation": false
+      }
+    },
+    {
+      "prompt": "At the edge of the lake, a turtle",
+      "output": "At the edge of the lake, a turtle came to a tree.\nThe boy looked up and",
+      "repetition": {
+        "word_count": 17,
+        "unique_trigram_ratio": 1.0,
+        "repeated_trigram_count": 0,
+        "longest_word_run": 1
+      },
+      "surface_checks": {
+        "sentence_count": 2,
+        "prompt_lexical_overlap": 0.286,
+        "fragment_like_sentences": 0,
+        "repeated_punctuation": false,
+        "unbalanced_curly_quotes": false,
+        "continuation_word_count": 9,
+        "empty_continuation": false
+      }
+    },
+    {
+      "prompt": "When the magic seed began to grow",
+      "output": "When the magic seed began to grow her teddy and started to cry.\nLily and the",
+      "repetition": {
+        "word_count": 16,
+        "unique_trigram_ratio": 1.0,
+        "repeated_trigram_count": 0,
+        "longest_word_run": 1
+      },
+      "surface_checks": {
+        "sentence_count": 2,
+        "prompt_lexical_overlap": 0.286,
+        "fragment_like_sentences": 0,
+        "repeated_punctuation": false,
+        "unbalanced_curly_quotes": false,
+        "continuation_word_count": 8,
+        "empty_continuation": false
+      }
+    }
+  ],
+  "summary": {
+    "samples": 15,
+    "empty_continuations": 0,
+    "continuation_word_counts": [
+      8,
+      8,
+      9,
+      9,
+      8,
+      9,
+      9,
+      8,
+      9,
+      8,
+      9,
+      8,
+      8,
+      9,
+      8
+    ],
+    "repeated_punctuation_samples": 0,
+    "unbalanced_quote_samples": 1,
+    "fragment_like_sentences": 0,
+    "repeated_trigram_total": 0
+  },
+  "human_review": [
+    "relevance",
+    "grammaticality",
+    "causal/context continuity",
+    "dialogue voice"
+  ]
+}
