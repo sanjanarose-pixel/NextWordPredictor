@@ -1,4 +1,4 @@
-"""Standalone Streamlit demo for the TinyStories V4 model."""
+"""Standalone Streamlit demo for NextWordPredictor V4."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -26,8 +26,8 @@ def get_model():
     return load_v4(CHECKPOINT, TOKENIZER, device="cpu")
 
 
-st.set_page_config(page_title="TinyStories V4", page_icon="📚", layout="centered")
-st.title("TinyStories V4")
+st.set_page_config(page_title="NextWordPredictor V4", layout="centered")
+st.title("NextWordPredictor V4")
 st.caption("A small children's-story language model trained from random initialization.")
 st.markdown(
     "The model learned from a 30,000-story subset of synthetic GPT-4-generated "
@@ -37,8 +37,9 @@ st.markdown(
 
 selected = st.selectbox("Try an example prompt", ["Choose an example…", *EXAMPLE_PROMPTS])
 default_prompt = "" if selected == "Choose an example…" else selected
-prompt = st.text_area("Your story opening", value=default_prompt, height=100,
-                      placeholder="Once upon a time, there was a little rabbit who")
+prompt = st.text_area("Your story opening", value=default_prompt, height=100, max_chars=500,
+                      placeholder="Once upon a time, there was a little rabbit who",
+                      help="Short prompts generate faster. The model uses a 64-token context.")
 
 if st.button("Continue story", type="primary", use_container_width=True):
     if not prompt.strip():
@@ -53,8 +54,10 @@ if st.button("Continue story", type="primary", use_container_width=True):
             continuation = full_text[len(prompt):]
             st.subheader("Continuation")
             st.write(continuation if continuation.strip() else "The model returned an empty continuation.")
-        except FileNotFoundError as exc:
-            st.error(f"The model files are missing: {exc}")
+        except FileNotFoundError:
+            st.error("The saved model files are unavailable. Please contact the app maintainer.")
+        except Exception:
+            st.error("Generation could not be completed. Please try again with a shorter prompt.")
 
 st.divider()
 st.caption(
